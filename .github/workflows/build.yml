@@ -1,0 +1,38 @@
+name: Build EXE
+
+# Скрипт будет запускаться автоматически при каждом обновлении кода в ветке main
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой
+
+jobs:
+  build:
+    # Указываем, что нам нужен сервер на Windows для создания .exe
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Версия Python
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install -r requirements.txt
+
+    - name: Build executable with PyInstaller
+      # Команда компиляции. --onefile делает один exe-файл. --noconsole скроет черное окно CMD (по желанию).
+      run: |
+        pyinstaller --onefile main.py
+
+    - name: Upload EXE artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AutoClicker-EXE
+        path: dist/main.exe
